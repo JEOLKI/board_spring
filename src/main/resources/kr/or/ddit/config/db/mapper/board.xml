@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board">
+
+	<select id="getBoardGubunList" parameterType="String" resultType="BoardGubunVo">
+		SELECT *
+		FROM board_gubun
+	</select>
+
+	<insert id="insertBoardGubun" parameterType="BoardGubunVo">
+		INSERT INTO board_gubun
+		VALUES( bgubun_seq.nextval, #{gubun_nm}, #{gubun_yn})
+	</insert>
+	
+	<update id="updateBoardGubun" parameterType="BoardGubunVo">
+		UPDATE board_gubun SET gubun_nm = #{gubun_nm}, gubun_yn = #{gubun_yn}
+		WHERE gubun_sq = #{gubun_sq}
+	</update>
+	
+	<delete id="deleteBoardGubunForTest" parameterType="String">
+		DELETE board_gubun
+		WHERE gubun_nm = #{gubun_nm}
+	</delete>
+	
+	<select id="getBoardList" parameterType="int" resultType="BoardVo">
+		SELECT *
+		FROM board
+		WHERE gubun_sq = #{gubun_sq}
+	</select>
+	
+	<select id="getBoardPageList" resultType="BoardVo" parameterType="PageVo">
+		SELECT *
+		FROM (SELECT rownum rn, a.*
+			    FROM(SELECT group_no, board_sq, LPAD('→', (LEVEL-1)*4, '1') || board_title board_title, userid, board_date, board_yn
+		             FROM board
+		             WHERE gubun_sq = #{gubun_sq}
+		             START WITH board_p_sq IS NULL
+		             CONNECT BY PRIOR board_sq = board_p_sq
+		             ORDER SIBLINGS BY group_no DESC, board_sq ASC) a)
+		WHERE rn between (#{page} - 1) * #{pageSize} + 1 and #{page} * #{pageSize}
+	</select>
+	
+	<select id="getBoardTotalCnt" resultType="int">
+		SELECT COUNT(*)
+		FROM board
+		WHERE gubun_sq = #{gubun_sq}
+	</select>
+	
+	<select id="getBoard" parameterType="int" resultType="BoardVo">
+		SELECT *
+		FROM board
+		WHERE board_sq = #{board_sq}
+	</select>
+	
+	<select id="getAtchFileList" parameterType="int" resultType="AtchFileVo">
+		SELECT *
+		FROM attachment
+		WHERE board_sq = #{board_sq}
+		ORDER BY atch_sq
+	</select>
+	
+	<select id="getReplyList" parameterType="int" resultType="ReplyVo">
+		SELECT *
+		FROM reply
+		WHERE board_sq = #{board_sq}
+		ORDER BY reply_sq
+	</select>
+	
+	
+	<insert id="insertReply" parameterType="ReplyVo">
+		INSERT INTO reply
+		VALUES( reply_seq.nextval, #{reply_content}, SYSDATE, 'y', #{board_sq}, #{userid})
+	</insert>
+	
+	<update id="deleteReply" parameterType="int">
+		UPDATE reply SET reply_yn = 'n'
+		WHERE reply_sq = #{reply_sq}
+	</update>
+	
+	<update id="deleteBoard" parameterType="int">
+		UPDATE board SET board_yn = 'n'
+		WHERE board_sq = #{board_sq}
+	</update>
+	
+	<delete id="deleteBoardForTest" parameterType="String">
+		DELETE board
+		WHERE board_title = #{board_title}
+	</delete>
+	
+	<insert id="insertBoard" parameterType="BoardVo">
+		INSERT INTO board
+		VALUES( board_seq.nextval, #{board_title}, SYSDATE, 'y', #{userid}, null, #{gubun_sq}, board_seq.currval, #{board_content})  
+		<selectKey keyProperty="board_sq" resultType="int" order="AFTER">
+			SELECT board_seq.currval FROM dual
+		</selectKey>
+	</insert>
+	
+	<insert id="insertBoardChild" parameterType="BoardVo">
+		INSERT INTO board
+		VALUES( board_seq.nextval, #{board_title}, SYSDATE, 'y', #{userid}, #{board_p_sq}, #{gubun_sq}, #{group_no}, #{board_content})  
+		<selectKey keyProperty="board_sq" resultType="int" order="AFTER">
+			SELECT board_seq.currval FROM dual
+		</selectKey>
+	</insert>
+	
+	<insert id="insertAtchFile" parameterType="AtchFileVo">
+		INSERT INTO attachment
+		VALUES( atch_seq.nextval, #{atch_filepath}, #{atch_filename}, #{board_sq})  
+	</insert>
+	
+	<select id="getAtchFile" parameterType="int" resultType="AtchFileVo">
+		SELECT *
+		FROM attachment
+		WHERE atch_sq = #{atch_sq}
+	</select>
+	
+	<delete id="deleteAtchFile" parameterType="int">
+		DELETE attachment
+		WHERE atch_sq = #{atch_sq}
+	</delete>
+
+	<update id="updateBoard" parameterType="BoardVo">
+		UPDATE board SET board_title = #{board_title}, board_content = #{board_content}, board_yn = #{board_yn}
+		WHERE board_sq = #{board_sq}
+	</update>
+
+</mapper>
