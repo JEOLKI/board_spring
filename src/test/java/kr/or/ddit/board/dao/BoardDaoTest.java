@@ -6,34 +6,18 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import kr.or.ddit.ModelTestConfig;
 import kr.or.ddit.board.model.AtchFileVo;
 import kr.or.ddit.board.model.BoardVo;
 import kr.or.ddit.board.model.ReplyVo;
 import kr.or.ddit.common.model.PageVo;
 
-
-public class BoardDaoTest {
+public class BoardDaoTest extends ModelTestConfig{
 	
-	private static final Logger logger = LoggerFactory.getLogger(BoardGubunDaoTest.class);
-	
-	BoardDaoI boardDao;
-	BoardVo boardVo;
-	
-	@Resource(name = "sqlSessionTemplate")
-	private SqlSessionTemplate sqlSession;
-	
-	@Before
-	public void setup() {
-		boardDao = new BoardDao();
-		boardVo = new BoardVo();
-	}
+	@Resource(name = "boardRepository")
+	private BoardDaoI boardDao;
 	
 	@Test
 	public void getBoardListTest() {
@@ -137,8 +121,7 @@ public class BoardDaoTest {
 	public void insertBoardTest() {
 		
 		/***Given***/
-		boardVo = new BoardVo("test", "test", "brown", 1);
-
+		BoardVo boardVo = new BoardVo("test", "test", "brown", 1, 1, 1);
 		/***When***/
 		int board_sq = boardDao.insertBoard(boardVo);
 		int Cnt = 0;

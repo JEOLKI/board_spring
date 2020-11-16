@@ -1,26 +1,42 @@
 package kr.or.ddit.board.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import kr.or.ddit.board.model.AtchFileVo;
+import kr.or.ddit.board.model.BoardVo;
 import kr.or.ddit.board.service.BoardServiceI;
 import kr.or.ddit.common.model.PageVo;
+import kr.or.ddit.file.FileUploadUtil;
 
 @RequestMapping("/board")
 @Controller
 public class BoardController {
 
+	private static final Logger logger = LoggerFactory.getLogger(BoardController.class);
+	
 	@Resource(name = "boardService")
 	private BoardServiceI boardService;
 	
-	@RequestMapping(path = "/list")
+	@RequestMapping(path = "/list", method = {RequestMethod.GET})
 	public String list(int gubun_sq,
 					   @RequestParam(name="page", defaultValue = "1", required = false) int page,
 					   @RequestParam(name="pageSize", defaultValue = "10", required = false ) int pageSize,
@@ -48,68 +64,116 @@ public class BoardController {
 		return "tiles/board/board";
 	}
 	
-	
-	
 	@RequestMapping(path = "/regist", method = {RequestMethod.GET})
-	public String registView() {
-		
-//		gubun_sq = Integer.parseInt(request.getParameter("gubun_sq"));
-//		userid = request.getParameter("userid");
-//		group_no = request.getParameter("group_no") == null? 0 : Integer.parseInt(request.getParameter("group_no")); 
-//		board_p_sq = request.getParameter("board_sq") == null? 0 : Integer.parseInt(request.getParameter("board_sq"));
+	public String registView(int gubun_sq, String userid, Model model,
+							 @RequestParam(name="group_no", defaultValue = "0", required = false) int group_no,
+							 @RequestParam(name="board_sq", defaultValue = "0", required = false) int board_p_sq
+							 ) {
+		model.addAttribute("gubun_sq", gubun_sq);
+		model.addAttribute("board_p_sq", board_p_sq);
+		model.addAttribute("userid", userid);
+		model.addAttribute("group_no", group_no);
 		
 		return "tiles/board/boardRegister";
 	}
 	
 	@RequestMapping(path = "/regist", method = {RequestMethod.POST})
-	public String registProcess() {
+	public String registProcess(BoardVo boardVo, MultipartHttpServletRequest mtfRequest) {
+
+		logger.debug("boardVo : {}", boardVo);
 		
-//		String board_title = request.getParameter("board_title");
-//		String editordata = request.getParameter("editordata");
-//		
-//		logger.debug("editordata : {}", editordata);
-//		
-//		if(group_no == 0) {
-//			boardVo = new BoardVo(board_title, editordata, userid, gubun_sq);
-//		}else {
-//			boardVo = new BoardVo(board_title, editordata, userid, board_p_sq, gubun_sq, group_no);
-//		}
-//		
-//		Map<String, Object> map = new HashMap<String, Object>();
-//		map.put("boardVo", boardVo);
-//		
-//		List<Part> fileList = new ArrayList<Part>();
-//		fileList.add(request.getPart("file1"));
-//		fileList.add(request.getPart("file2"));
-//		fileList.add(request.getPart("file3"));
-//		fileList.add(request.getPart("file4"));
-//		fileList.add(request.getPart("file5"));
-//		
-//		AtchFileVo atchFileVo;
-//		List<AtchFileVo> atchFileList = new ArrayList<AtchFileVo>();
-//		
-//		for (Part file : fileList) {
-//			
-//			if(file != null) {
-//				if(file.getSize() > 0) {
-//					String fileName = FileUploadUtil.getFilename(file.getHeader("Content-Disposition"));
-//					String filePath = "D:\\attachment\\" + UUID.randomUUID().toString() +"."+ FileUploadUtil.getExtension(fileName);
-//					atchFileVo = new AtchFileVo( filePath , fileName);
-//					atchFileList.add(atchFileVo);
-//					file.write(filePath);
-//				}
-//			}
-//		}
-//		
-//		logger.debug("atchFileList : {}", atchFileList);
-//		
-//		map.put("atchFileList", atchFileList);
-//		
-//		int boardCurSq = boardService.insertBoard(map);
-//		
-//		response.sendRedirect("/board?board_sq="+boardCurSq);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("boardVo", boardVo);
 		
-		return "tiles/board/boardRegister";
+		logger.debug("mtfRequest : {}", mtfRequest.getFiles("file"));
+
+		List<MultipartFile> fileList = mtfRequest.getFiles("file");
+
+		AtchFileVo atchFileVo;
+		List<AtchFileVo> atchFileList = new ArrayList<AtchFileVo>();
+		
+		for (MultipartFile file : fileList) {
+			
+			if(file.getSize() > 0) {
+					String fileName = file.getOriginalFilename();
+					String extension = FileUploadUtil.getExtension(fileName);
+					String filePath = "D:\\attachment\\" + UUID.randomUUID().toString() + "." + extension ;
+					File uploadFile = new File(filePath);
+					atchFileVo = new AtchFileVo(filePath, fileName);
+					atchFileList.add(atchFileVo);
+					try {
+						file.transferTo(uploadFile);
+					} catch (IllegalStateException | IOException e) {
+						e.printStackTrace();
+					}
+			}
+		}
+		
+		logger.debug("atchFileList : {}", atchFileList);
+		map.put("atchFileList", atchFileList);
+		int boardCurSq = boardService.insertBoard(map);
+		
+		return "redirect:"+ mtfRequest.getContextPath() +"/board/detail?board_sq="+boardCurSq;
+	}
+	
+	@RequestMapping(path = "/update", method = {RequestMethod.GET})
+	public String updateView(int board_sq, Model model) {
+		Map<String, Object> map = boardService.getBoard(board_sq);
+		BoardVo boardVo = (BoardVo) map.get("boardVo");
+		List<AtchFileVo> atchFileList = (List<AtchFileVo>)map.get("atchFileList");
+		
+		model.addAttribute("boardVo", boardVo);
+		model.addAttribute("atchFileList", atchFileList);
+		
+		return "tiles/board/boardUpdate";
+	}
+	
+	@RequestMapping(path = "/update", method = {RequestMethod.POST})
+	public String updateProcess(BoardVo boardVo, 
+								@RequestParam(required = false) List<String> deleteAtchSq,
+								MultipartHttpServletRequest mtfRequest) {
+		
+		logger.debug("boardVo : {} ",boardVo);
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("boardVo", boardVo);
+		map.put("deleteAtchSq", deleteAtchSq);
+		
+		List<MultipartFile> fileList = mtfRequest.getFiles("file");
+
+		List<AtchFileVo> atchFileList = new ArrayList<AtchFileVo>();
+		
+		for (MultipartFile file : fileList) {
+			
+			if(file.getSize() > 0) {
+					String fileName = file.getOriginalFilename();
+					String extension = FileUploadUtil.getExtension(fileName);
+					String filePath = "D:\\attachment\\" + UUID.randomUUID().toString() + "." + extension ;
+					File uploadFile = new File(filePath);
+					AtchFileVo atchFileVo = new AtchFileVo(filePath, fileName);
+					atchFileList.add(atchFileVo);
+					try {
+						file.transferTo(uploadFile);
+					} catch (IllegalStateException | IOException e) {
+						e.printStackTrace();
+					}
+			}
+		}
+		logger.debug("atchFileList : {}", atchFileList);
+		map.put("atchFileList", atchFileList);
+		int boardCurSq = boardService.updateBoard(map);
+		return "redirect:"+mtfRequest.getContextPath()+"/board/detail?board_sq="+boardCurSq;
+	}
+	
+	@RequestMapping(path = "/delete", method = {RequestMethod.GET})
+	public String deleteProcess(int board_sq, int gubun_sq, String gubun_nm,
+								HttpServletRequest request) {
+		int deleteCnt = boardService.deleteBoard(board_sq);
+		if ( deleteCnt == 1 ) {
+			return "redirect:" + request.getContextPath() + "/board/list?gubun_sq=" + gubun_sq + "&gubun_nm=" + gubun_nm;
+		} else {
+			return "main";
+		}
 	}
 	
 }

@@ -2,6 +2,13 @@ package kr.or.ddit.board.model;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+@XmlRootElement(name="boardVo")
 public class BoardVo {
 
 	private int rn;

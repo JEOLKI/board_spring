@@ -2,6 +2,9 @@ package kr.or.ddit.board.model;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name="replyVo")
 public class ReplyVo {
 
 	private int reply_sq;

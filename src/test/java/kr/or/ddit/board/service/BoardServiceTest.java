@@ -5,31 +5,18 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.annotation.Resource;
 
+import org.junit.Test;
+
+import kr.or.ddit.ModelTestConfig;
 import kr.or.ddit.board.model.BoardVo;
 import kr.or.ddit.common.model.PageVo;
 
-public class BoardServiceTest {
-	private static final Logger logger = LoggerFactory.getLogger(BoardServiceTest.class);
-	
+public class BoardServiceTest extends ModelTestConfig{
+
+	@Resource(name = "boardService")
 	BoardServiceI boardService;
-	BoardVo boardVo;
-
-	@Before
-	public void setup() {
-		boardService = new BoardService();
-		boardVo = new BoardVo();
-	}
-
-	@After
-	public void reset() {
-
-	}
 
 	@Test
 	public void getBoardListTest() {

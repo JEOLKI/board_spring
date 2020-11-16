@@ -15,7 +15,7 @@
 			var board_sq = $(this).data("board_sq");
 			console.log("board_sq : " + board_sq);
 
-			document.location="/board?board_sq=" + board_sq; 
+			document.location="/board/detail?board_sq=" + board_sq; 
 			
 		});
 	});

@@ -2,7 +2,6 @@ package kr.or.ddit.board.controller;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,7 +18,7 @@ public class BoardGubunController {
 	@Resource(name = "boardGubunService")
 	private BoardGubunServiceI boardGubunService;
 	
-	@RequestMapping("/list")
+	@RequestMapping(path = "/list", method = {RequestMethod.GET})
 	public String list(Model model) {
 		model.addAttribute("boardGubunList",boardGubunService.getBoardGubunList());
 		return "jsonView";

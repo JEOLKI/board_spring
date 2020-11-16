@@ -8,26 +8,24 @@
 	$(document).ready(function(){
 
 		$("#replyRegBtn").on('click', function(){
-
 			$("#replyfrm").submit();
-
 		});
 
-		$("#replyDelBtn").on('click', function(){
+		$(".replyDelBtn").on('click', function(){
 			var reply_sq = $(this).data("reply_sq");
-			document.location="${cp }/replyDelete?reply_sq=" + reply_sq +"&board_sq=${boardVo.board_sq }";
+			document.location="${cp }/reply/delete?reply_sq=" + reply_sq +"&board_sq=${boardVo.board_sq }";
 		});
 
 		$("#boardDelBtn").on('click', function(){
-			document.location="${cp }/boardDelete?board_sq=${boardVo.board_sq }&gubun_sq=${boardVo.gubun_sq}&gubun_nm=${param.gubun_nm}";
+			document.location="${cp }/board/delete?board_sq=${boardVo.board_sq }&gubun_sq=${boardVo.gubun_sq}&gubun_nm=${param.gubun_nm}";
 		});
 
 		$("#boardChildBtn").on('click', function(){
-			document.location="${cp }/boardRegist?userid=${S_MEMBER.userid }&gubun_sq=${boardVo.gubun_sq }&board_sq=${boardVo.board_sq }&group_no=${boardVo.group_no }";
+			document.location="${cp }/board/regist?userid=${S_MEMBER.userid }&gubun_sq=${boardVo.gubun_sq }&board_sq=${boardVo.board_sq }&group_no=${boardVo.group_no }";
 		})
 
 		$("#BoardUpdateBtn").on('click', function(){
-			document.location="${cp }/boardUpdate?board_sq=${boardVo.board_sq }";
+			document.location="${cp }/board/update?board_sq=${boardVo.board_sq }";
 		})
 
 		$('#reply_content').on('keyup', function(){
@@ -78,7 +76,7 @@
 	<div class="col-sm-10">
 	
 		<c:forEach items="${atchFileList }" var="atchfile">
-			<a href='${cp }/fileDownload?atch_sq=${atchfile.atch_sq }' >${atchfile.atch_filename }</a> <br>
+			<a href='${cp }/file/download?atch_sq=${atchfile.atch_sq }' >${atchfile.atch_filename }</a> <br>
 		</c:forEach>
 	</div>
 </div>
@@ -109,7 +107,7 @@
 					<span>${reply.reply_content }</span> [${reply.userid } / <fmt:formatDate value="${reply.reply_date }" pattern="YYYY-MM-dd"/>]
 					</label>
 					<c:if test="${reply.userid == S_MEMBER.userid }">
-						<button id="replyDelBtn" data-reply_sq="${reply.reply_sq }">삭제</button>
+						<button class="replyDelBtn" data-reply_sq="${reply.reply_sq }">삭제</button>
 					</c:if>
 				</c:otherwise>
 			</c:choose>
@@ -118,7 +116,7 @@
 		</c:forEach>
 		<br>
 		
-		<form id="replyfrm" action="${cp }/replyRegist" method="get">
+		<form id="replyfrm" action="${cp }/reply/regist" method="get">
 			<input HIDDEN type="text" name="board_sq" value="${boardVo.board_sq }">
 			<input HIDDEN type="text" name="userid" value="${S_MEMBER.userid }">
 			<textarea id="reply_content" name="reply_content" rows="" cols=""></textarea>

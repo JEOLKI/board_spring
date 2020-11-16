@@ -105,7 +105,7 @@ public class BoardService implements BoardServiceI {
 		
 		int updateCnt = boardDao.updateBoard(boardVo);
 		
-		String[] deleteAtchSq = (String[]) map.get("deleteAtchSq");
+		List<String> deleteAtchSq = (List<String>) map.get("deleteAtchSq");
 		
 		if(deleteAtchSq != null) {
 			for(String atch_sq : deleteAtchSq) {

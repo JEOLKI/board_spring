@@ -2,8 +2,6 @@ package kr.or.ddit.board.dao;
 
 import java.util.List;
 
-import org.apache.ibatis.session.SqlSession;
-
 import kr.or.ddit.board.model.AtchFileVo;
 import kr.or.ddit.board.model.BoardVo;
 import kr.or.ddit.board.model.ReplyVo;

@@ -2,35 +2,22 @@ package kr.or.ddit.board.service;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.ibatis.session.SqlSession;
-import org.junit.After;
-import org.junit.Before;
+import javax.annotation.Resource;
+
 import org.junit.Test;
 
+import kr.or.ddit.ModelTestConfig;
 import kr.or.ddit.board.model.ReplyVo;
 
-public class ReplyServiceTest {
+public class ReplyServiceTest extends ModelTestConfig{
 	
+	@Resource(name = "replyService")
 	ReplyServiceI replyService;
-	ReplyVo replyVo;
-	
-	SqlSession sqlSession;
-	
-	@Before
-	public void setup() {
-		replyService = new ReplyService();
-		replyVo = new ReplyVo();
-	}
-	
-	@After
-	public void reset() {
-		sqlSession.close();
-	}
 	
 	@Test
 	public void insertReplyTest() {
 		/***Given***/
-		replyVo = new ReplyVo("reply_content", 1, "brown");
+		ReplyVo	replyVo = new ReplyVo("reply_content", 1, "brown");
 		
 		/***When***/
 		int insertCnt = replyService.insertReply(replyVo);

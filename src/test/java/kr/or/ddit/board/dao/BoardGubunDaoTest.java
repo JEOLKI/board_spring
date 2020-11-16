@@ -1,38 +1,20 @@
 package kr.or.ddit.board.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
+import javax.annotation.Resource;
+
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import kr.or.ddit.ModelTestConfig;
 import kr.or.ddit.board.model.BoardGubunVo;
-import kr.or.ddit.board.service.BoardGubunService;
 
-public class BoardGubunDaoTest {
+public class BoardGubunDaoTest extends ModelTestConfig{
 	
-	private static final Logger logger = LoggerFactory.getLogger(BoardGubunDaoTest.class);
-	
-	BoardGubunDaoI boardGubunDao;
-	BoardGubunVo boardGubunVo;
-	
-	@Before
-	public void setup() {
-		boardGubunDao = new BoardGubunDao();
-		boardGubunVo = new BoardGubunVo("test", "n");
-		boardGubunDao.deleteBoardGubun("test");
-	}
-	
-	@After
-	public void reset() {
-		boardGubunVo = new BoardGubunVo(1,"자유게시판", "y");
-		boardGubunDao.updateBoardGubun(boardGubunVo);
-	}
-	
+	@Resource(name = "boardGubunRepository")
+	private BoardGubunDaoI boardGubunDao;
 	
 	@Test
 	public void getBoardGubunListTest() {
@@ -48,6 +30,7 @@ public class BoardGubunDaoTest {
 	@Test
 	public void insertBoardGubunTest() {
 		/***Given***/
+		BoardGubunVo boardGubunVo = new BoardGubunVo("1", "y");
 		
 		/***When***/
 		int insertCnt = boardGubunDao.insertBoardGubun(boardGubunVo);
@@ -59,7 +42,7 @@ public class BoardGubunDaoTest {
 	@Test
 	public void updateBoardGubunTest() {
 		/***Given***/
-		boardGubunVo = new BoardGubunVo(1, "updateTest", "n");
+		BoardGubunVo boardGubunVo = new BoardGubunVo(1, "updateTest", "n");
 		
 		/***When***/
 		int insertCnt = boardGubunDao.updateBoardGubun(boardGubunVo);
